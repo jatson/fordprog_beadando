@@ -83,7 +83,6 @@ public:
     }
 };
 
-
 class Negate : public CalcNode
 {
     CalcNode* node;

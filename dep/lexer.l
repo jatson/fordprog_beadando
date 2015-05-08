@@ -31,7 +31,7 @@
  /* Int */
 [0-9]+ {
     yylval->integerVal = atoi(yytext);
-    return token::INTEGER;
+    return token::INT;
 }
 
  /* Float num */
@@ -74,7 +74,7 @@
 
 [A-Za-z][A-Za-z0-9_,.-]* {
     yylval->stringVal = new std::string(yytext, yyleng);
-    return token::STRING;
+    return token::STR;
 }
 
  /* Whitespace */
