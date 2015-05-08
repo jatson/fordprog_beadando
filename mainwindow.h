@@ -33,12 +33,16 @@ private slots:
 
     void on_inputLineEdit_returnPressed();
 
+    void on_actionOpen_Input_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     CalcContext *calc;
     asd::Driver *driver;
     std::stringstream treel_out;
+
+    void parseInput(const QString & input);
 };
 
 #endif // MAINWINDOW_H

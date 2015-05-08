@@ -1,84 +1,71 @@
-%{ /*** C/C++ Deklarációk ***/
-
+%{
         #include <stdio.h>
         #include <string>
         #include <vector>
-
+        #include <math.h>
         #include "expression.h"
-
+        #include "driver.h"
+        #include "scanner.h"
+        #undef yylex
+        #define yylex driver.lexer->lex
 %}
 
-/*** yacc/bison Deklarációk ***/
-
-/* Szükséges: bison 2.3 vagy későbbi */
+/* Bison settings */
 %require "2.3"
-
-/* Debug hozzáadása */
 %debug
-
-/* Kezdő szimbólum a "start" */
 %start start
-
-/* Használjuk az újabb C++ "váz" fájlt */
 %skeleton "lalr1.cc"
-
-/* Namespace, amiben a parser elhelyezkedik */
 %name-prefix "asd"
-
-/* A Parser osztály nevének beállítása */
 %define "parser_class_name" {Parser}
-
-/* kövessük nyomon a jelenlegi pozíciót a bemenetben */
 %locations
 %initial-action {
-    // a kezdeti pozíció-objektum inicializálása
     @$.begin.filename = @$.end.filename = &driver.streamname;
 };
-
-/* A drivert referenciaként adjuk a parsernek és a scannernek,
- * ezáltal egyszerű és hatékony tiszta interfészt használunk és
- * nem hagyatkozunk globális változókra. */
 %parse-param { class Driver& driver }
-
-/* Verbose hibaüzenetek */
 %error-verbose
 
-%union {
+/* Custom variable types ( must be of static size ) */
+%union
+{
     int                         integerVal;
     double                      doubleVal;
     std::string*                stringVal;
     class CalcNode*             calcnode;
 }
 
-// Tokenek:
 
+/* Tokens defines for the keywords */
 %token                  END          0  "end of input"
 %token                  EOL             "end of line"
 %token <integerVal>     INTEGER         "integer"
 %token <doubleVal>      DOUBLE          "double"
 %token <stringVal>      STRING          "string"
+%token                  PI
+%token                  SIN
+%token                  COS
+%token                  SQRT
 
-%type <calcnode>        constant
-%type <calcnode>        atomexpr powexpr unaryexpr mulexpr addexpr expr
+/* Types defines for terminal expressions */
+%type <calcnode> constant
+%type <calcnode> atomexpr
+%type <calcnode> powexpr
+%type <calcnode> unaryexpr
+%type <calcnode> mulexpr
+%type <calcnode> addexpr
+%type <calcnode> expr
 
+/* Preventing memory leaks in non-terminal expressions. */
 %destructor { delete $$; } STRING
 %destructor { delete $$; } constant
-%destructor { delete $$; } atomexpr powexpr unaryexpr mulexpr addexpr expr
+%destructor { delete $$; } atomexpr
+%destructor { delete $$; } powexpr
+%destructor { delete $$; } unaryexpr
+%destructor { delete $$; } mulexpr
+%destructor { delete $$; } addexpr
+%destructor { delete $$; } expr
 
-%{
-
-#include "driver.h"
-#include "scanner.h"
-
-/* "Összekötjük" a bison parser-t a diver-ből a flex scanner osztállyal.
- *  Definiáljuk a yylex() függvényhívást, hogy húzza be a következő tokent
- *  a driver lexer részéből. */
-#undef yylex
-#define yylex driver.lexer->lex
-
-%}
+/* The rules */
 %%
-
 constant : INTEGER
            {
                $$ = new Constant($1);
@@ -87,15 +74,33 @@ constant : INTEGER
            {
                $$ = new Constant($1);
            }
+;
 
 atomexpr : constant
-           {
-               $$ = $1;
-           }
-         | '(' expr ')'
-           {
-               $$ = $2;
-           }
+        {
+            $$ = $1;
+        }
+        | '(' expr ')'
+        {
+            $$ = $2;
+        }
+        | PI
+        {
+            $$ = new Pi();
+        }
+        | SIN '(' expr ')'
+        {
+            $$ = new Sin($3);
+        }
+        | COS '(' expr ')'
+        {
+            $$ = new Cos($3);
+        }
+        | SQRT '(' expr ')'
+        {
+            $$ = new Sqrt($3);
+        }
+;
 
 powexpr : atomexpr
           {
@@ -105,6 +110,7 @@ powexpr : atomexpr
           {
               $$ = new Power($1, $3);
           }
+;
 
 unaryexpr : powexpr
             {
@@ -118,6 +124,11 @@ unaryexpr : powexpr
             {
                 $$ = new Negate($2);
             }
+          | '!' powexpr
+            {
+                $$ = new Factor($2);
+            }
+;
 
 mulexpr : unaryexpr
           {
@@ -135,6 +146,7 @@ mulexpr : unaryexpr
           {
               $$ = new Modulo($1, $3);
           }
+;
 
 addexpr : mulexpr
           {
@@ -148,11 +160,13 @@ addexpr : mulexpr
           {
               $$ = new Subtract($1, $3);
           }
+;
 
 expr    : addexpr
           {
               $$ = $1;
           }
+;
 
 start   : /* empty */
         | start ';'
@@ -169,9 +183,10 @@ start   : /* empty */
           {
               driver.calc.expressions.push_back($2);
           }
-
+;
 %%
 
-void asd::Parser::error(const Parser::location_type& l, const std::string& m) {
+void asd::Parser::error(const Parser::location_type& l, const std::string& m)
+{
     driver.error(l, m);
 }

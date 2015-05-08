@@ -82,6 +82,13 @@
      <height>30</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Fi&amp;le</string>
+    </property>
+    <addaction name="actionOpen_Input"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -90,10 +97,25 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpen_Input"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen_Input">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/open-file-icon.ICO</normaloff>:/icons/open-file-icon.ICO</iconset>
+   </property>
+   <property name="text">
+    <string>Open Input</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

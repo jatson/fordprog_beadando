@@ -1,50 +1,26 @@
-%{ /*** C/C++ Deklarációk ***/
-
+%{
     #include <string>
     #include "scanner.h"
     #include <QString>
 
-    /* behúzzuk a parser tokenjeit lokális típusokként */
     typedef asd::Parser::token token;
     typedef asd::Parser::token_type token_type;
 
-    /* Alapértelmezésként a yylex() int-et ad vissza, de mi token_type-ot használunk.
-         * Sajnos a yyterminate() alapértelmezésként 0-t ad vissza, de nekünk
-         * token::END kell. */
+    /* Some settings wich needed for correct run */
     #define yyterminate() return token::END
-
-    /* Kikapcsoljuk az unistd.h behúzását, amely nem elérhető Visual C++ alatt Windows platformon.
-         * A C++ scanner használjon STL streameket! */
     #define YY_NO_UNISTD_H
-
-%}
-
-/*** Flex Deklarációk és beállítások ***/
-
-/* Engedélyezzük a C++ scanner osztály generálását */
-%option c++
-
-/* Változtassuk meg a scanner osztály nevét, ezzel a beállítással "ExampleFlexLexer" nevű osztályt eredményezve. */
-%option prefix="asd"
-
-/* A flex manual-ja szerint, ez az opció végrehajt némi optimalizálást. */
-%option batch
-
-%option debug
-
-/* no support for include files is planned */
-%option yywrap nounput
-
-/* Engedélyezi a kezdési feltételek stack-jét */
-%option stack
-
-/* A következő define gondoskodik a pozíciók pontos nyomonkövetéséről. Minden alkalommal,
-* amikor az yylex() meghívódik, a kezdési pozíciót a végződési pozícióhoz mozgatjuk. */
-%{
     #define YY_USER_ACTION  yylloc->columns(yyleng);
 %}
 
-%%/*** Reguláris kifejezések ***/
+/* Flex settings */
+%option c++
+%option prefix="asd"
+%option debug
+%option yywrap nounput
+%option stack
+
+/* Regular expr. */
+%%
 
 
 %{/* ez a kódrészlet a yylex() elejére kerül */
@@ -52,15 +28,48 @@
     yylloc->step();
 %}
 
-
+ /* Int */
 [0-9]+ {
     yylval->integerVal = atoi(yytext);
     return token::INTEGER;
 }
 
-[0-9]+"."[0-9]* {
+ /* Float num */
+-?([0-9]+\.[0-9]+|\.[0-9]+|[0-9]+\.) {
     yylval->doubleVal = QString(yytext).toDouble();
     return token::DOUBLE;
+}
+
+"pi" {
+    return token::PI;
+}
+
+"PI" {
+    return token::PI;
+}
+
+"sqrt" {
+    return token::SQRT;
+}
+
+"SQRT" {
+    return token::SQRT;
+}
+
+"sin" {
+    return token::SIN;
+}
+
+"cos" {
+    return token::COS;
+}
+
+"SIN" {
+    return token::SIN;
+}
+
+"COS" {
+    return token::COS;
 }
 
 [A-Za-z][A-Za-z0-9_,.-]* {
@@ -68,12 +77,12 @@
     return token::STRING;
 }
 
- /* kezeljük le a white-spaceket */
+ /* Whitespace */
 [ \t\r]+ {
     yylloc->step();
 }
 
- /* kezeljük le a sor végi lezárásokat */
+ /* line endings */
 \n {
      yylloc->lines(yyleng); yylloc->step();
      return token::EOL;
