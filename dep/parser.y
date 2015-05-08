@@ -37,36 +37,36 @@
 /* Tokens defines for the keywords */
 %token                  END          0  "end of input"
 %token                  EOL             "end of line"
-%token <integerVal>     INTEGER         "integer"
+%token <integerVal>     INT         "integer"
 %token <doubleVal>      DOUBLE          "double"
-%token <stringVal>      STRING          "string"
+%token <stringVal>      STR          "string"
 %token                  PI
 %token                  SIN
 %token                  COS
 %token                  SQRT
 
 /* Types defines for terminal expressions */
-%type <calcnode> constant
-%type <calcnode> atomexpr
-%type <calcnode> powexpr
-%type <calcnode> unaryexpr
-%type <calcnode> mulexpr
-%type <calcnode> addexpr
+%type <calcnode> number
+%type <calcnode> atom
+%type <calcnode> power
+%type <calcnode> unary
+%type <calcnode> multiple
+%type <calcnode> add
 %type <calcnode> expr
 
 /* Preventing memory leaks in non-terminal expressions. */
-%destructor { delete $$; } STRING
-%destructor { delete $$; } constant
-%destructor { delete $$; } atomexpr
-%destructor { delete $$; } powexpr
-%destructor { delete $$; } unaryexpr
-%destructor { delete $$; } mulexpr
-%destructor { delete $$; } addexpr
+%destructor { delete $$; } STR
+%destructor { delete $$; } number
+%destructor { delete $$; } atom
+%destructor { delete $$; } power
+%destructor { delete $$; } unary
+%destructor { delete $$; } multiple
+%destructor { delete $$; } add
 %destructor { delete $$; } expr
 
 /* The rules */
 %%
-constant : INTEGER
+number : INT
            {
                $$ = new Constant($1);
            }
@@ -76,7 +76,7 @@ constant : INTEGER
            }
 ;
 
-atomexpr : constant
+atom : number
         {
             $$ = $1;
         }
@@ -87,6 +87,72 @@ atomexpr : constant
         | PI
         {
             $$ = new Pi();
+        }
+;
+
+power : atom
+          {
+              $$ = $1;
+          }
+        | atom '^' power
+          {
+              $$ = new Power($1, $3);
+          }
+;
+
+unary : power
+            {
+                $$ = $1;
+            }
+          | '+' power
+            {
+                $$ = $2;
+            }
+          | '-' power
+            {
+                $$ = new Negate($2);
+            }
+          | '!' power
+            {
+                $$ = new Factor($2);
+            }
+;
+
+multiple : unary
+          {
+              $$ = $1;
+          }
+        | multiple '*' unary
+          {
+              $$ = new Multiply($1, $3);
+          }
+        | multiple '/' unary
+          {
+              $$ = new Divide($1, $3);
+          }
+        | multiple '%' unary
+          {
+              $$ = new Modulo($1, $3);
+          }
+;
+
+add : multiple
+          {
+              $$ = $1;
+          }
+        | add '+' multiple
+          {
+              $$ = new Add($1, $3);
+          }
+        | add '-' multiple
+          {
+              $$ = new Subtract($1, $3);
+          }
+;
+
+expr    : add
+        {
+        $$ = $1;
         }
         | SIN '(' expr ')'
         {
@@ -100,72 +166,6 @@ atomexpr : constant
         {
             $$ = new Sqrt($3);
         }
-;
-
-powexpr : atomexpr
-          {
-              $$ = $1;
-          }
-        | atomexpr '^' powexpr
-          {
-              $$ = new Power($1, $3);
-          }
-;
-
-unaryexpr : powexpr
-            {
-                $$ = $1;
-            }
-          | '+' powexpr
-            {
-                $$ = $2;
-            }
-          | '-' powexpr
-            {
-                $$ = new Negate($2);
-            }
-          | '!' powexpr
-            {
-                $$ = new Factor($2);
-            }
-;
-
-mulexpr : unaryexpr
-          {
-              $$ = $1;
-          }
-        | mulexpr '*' unaryexpr
-          {
-              $$ = new Multiply($1, $3);
-          }
-        | mulexpr '/' unaryexpr
-          {
-              $$ = new Divide($1, $3);
-          }
-        | mulexpr '%' unaryexpr
-          {
-              $$ = new Modulo($1, $3);
-          }
-;
-
-addexpr : mulexpr
-          {
-              $$ = $1;
-          }
-        | addexpr '+' mulexpr
-          {
-              $$ = new Add($1, $3);
-          }
-        | addexpr '-' mulexpr
-          {
-              $$ = new Subtract($1, $3);
-          }
-;
-
-expr    : addexpr
-          {
-              $$ = $1;
-          }
 ;
 
 start   : /* empty */
