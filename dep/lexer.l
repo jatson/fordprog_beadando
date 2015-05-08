@@ -3,8 +3,8 @@
     #include "scanner.h"
     #include <QString>
 
-    typedef asd::Parser::token token;
-    typedef asd::Parser::token_type token_type;
+    typedef beadando::Parser::token token;
+    typedef beadando::Parser::token_type token_type;
 
     /* Some settings wich needed for correct run */
     #define yyterminate() return token::END
@@ -14,7 +14,7 @@
 
 /* Flex settings */
 %option c++
-%option prefix="asd"
+%option prefix="beadando"
 %option debug
 %option yywrap nounput
 %option stack
@@ -88,44 +88,32 @@
      return token::EOL;
  }
 
- /* a többi karaktert adjuk át a "kedves" bison-nak. */
+ /* other characters */
 . {
     return static_cast<token_type>(*yytext);
  }
 
 %%
 
- namespace asd {
-
-     // Scanner Osztályhoz tartozik még:
-
-     Scanner::Scanner(std::istream* in, std::ostream* out) : asdFlexLexer(in, out) {}
-
+ namespace beadando
+ {
+     Scanner::Scanner(std::istream* in, std::ostream* out) : beadandoFlexLexer(in, out) {}
      Scanner::~Scanner() {}
-
-     void Scanner::set_debug(bool b) {
-         yy_flex_debug = b;
-     }
+     void Scanner::set_debug(bool b) { yy_flex_debug = b; }
 
  }
 
- /* Ez a ExampleFlexLexer::yylex() implementáció szükséges ahhoz, hogy bekerüljön az asdFlexLexer osztály
-  * virtuális függvénytáblájába helyesen. Definiáljuk a scanner fő yylex függvényét egy YY_DECL-el
-  * hogy a Scanner osztályban maradjon. */
+ /* add beadandoFlexLexer to the virtual function table */
 
 #ifdef yylex
 #undef yylex
 #endif
 
- int asdFlexLexer::yylex() {
-     std::cerr << "in asdFlexLexer::yylex() !" << std::endl;
+ int beadandoFlexLexer::yylex() {
+     std::cerr << "in beadandoFlexLexer::yylex() !" << std::endl;
      return 0;
  }
 
- /* Amikor a scanner enf-of-file jelzést kap a YY_INPUT-ról, megnézi a yywrap() függvényt.
-  * Ha a yywrap() hamisat ad vissza (0), akkor a függvény már előre beállította a 'yyin'-t hogy
-  * egy következő bemeneti fájlra mutasson, majd a szkennelés folytatódik. Ha igazat ad vissza (nem 0),
-  * akkor a szkennelés megszakad, 0-t adva vissza a hívójának. */
- int asdFlexLexer::yywrap() {
+ int beadandoFlexLexer::yywrap() {
      return 1;
  }

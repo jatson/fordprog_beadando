@@ -6,26 +6,26 @@
 
 #ifndef YY_DECL
 
-#define YY_DECL                                        \
-    asd::Parser::token_type                         \
-    asd::Scanner::lex(                              \
-        asd::Parser::semantic_type* yylval,         \
-        asd::Parser::location_type* yylloc          \
+#define YY_DECL                                         \
+    beadando::Parser::token_type                        \
+    beadando::Scanner::lex(                             \
+        beadando::Parser::semantic_type* yylval,        \
+        beadando::Parser::location_type* yylloc         \
     )
 #endif
 
 #ifndef __FLEX_LEXER_H
-#define yyFlexLexer asdFlexLexer
+#define yyFlexLexer beadandoFlexLexer
 #include "FlexLexer.h"
 #undef yyFlexLexer
 #endif
 
 #include "parser.h"
 
-namespace asd
+namespace beadando
 {
 
-    class Scanner : public asdFlexLexer
+    class Scanner : public beadandoFlexLexer
     {
     public:
         Scanner(std::istream* arg_yyin = 0,

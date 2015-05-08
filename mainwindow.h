@@ -14,7 +14,7 @@
 
 /* Headers made by user */
 #include "expression.h"
-#include "driver.h"
+#include "interface.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,8 +38,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    CalcContext *calc;
-    asd::Driver *driver;
+    Calculator *calc;
+    beadando::Interface *interface;
     std::stringstream treel_out;
 
     void parseInput(const QString & input);

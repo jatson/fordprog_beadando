@@ -5,15 +5,15 @@
 #include <vector>
 #include <QDebug>
 
-class CalcContext;
+class Calculator;
 
-namespace asd
+namespace beadando
 {
 
-    class Driver
+    class Interface
     {
     public:
-        Driver(class CalcContext& calc);
+        Interface(class Calculator& calc);
 
         bool trace_scanning;
         bool trace_parsing;
@@ -27,7 +27,7 @@ namespace asd
         QString error(const std::string& m);
 
         class Scanner* lexer;
-        class CalcContext& calc;
+        class Calculator& calc;
     };
 
 }

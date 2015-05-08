@@ -7,8 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    calc = new CalcContext();
-    driver = new asd::Driver(*calc);
+    calc = new Calculator();
+    interface = new beadando::Interface(*calc);
 
 }
 
@@ -68,7 +68,7 @@ void MainWindow::parseInput(const QString &input)
     else
     {
         calc->clearExpressions();
-        if(driver->parse_string(input.toStdString(), "input"))
+        if(interface->parse_string(input.toStdString(), "input"))
         {
             for (unsigned int i = 0; i < calc->expressions.size(); ++i)
             {

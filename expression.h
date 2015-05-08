@@ -240,11 +240,11 @@ public:
     }
 };
 
-class CalcContext
+class Calculator
 {
 public:
     std::vector<CalcNode*> expressions;
-    ~CalcContext() { clearExpressions(); }
+    ~Calculator() { clearExpressions(); }
     void clearExpressions()
     {
         for(unsigned int i = 0; i < expressions.size(); ++i) delete expressions[i];

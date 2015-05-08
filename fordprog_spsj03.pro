@@ -14,12 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    driver.cpp
+    interface.cpp
 
 HEADERS  += mainwindow.h \
     scanner.h \
     expression.h \
-    driver.h
+    interface.h
 
 FORMS    += mainwindow.ui
 

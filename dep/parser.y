@@ -4,10 +4,10 @@
         #include <vector>
         #include <math.h>
         #include "expression.h"
-        #include "driver.h"
+        #include "interface.h"
         #include "scanner.h"
         #undef yylex
-        #define yylex driver.lexer->lex
+        #define yylex interface.lexer->lex
 %}
 
 /* Bison settings */
@@ -15,13 +15,13 @@
 %debug
 %start start
 %skeleton "lalr1.cc"
-%name-prefix "asd"
+%name-prefix "beadando"
 %define "parser_class_name" {Parser}
 %locations
 %initial-action {
-    @$.begin.filename = @$.end.filename = &driver.streamname;
+    @$.begin.filename = @$.end.filename = &interface.streamname;
 };
-%parse-param { class Driver& driver }
+%parse-param { class Interface& interface }
 %error-verbose
 
 /* Custom variable types ( must be of static size ) */
@@ -173,20 +173,20 @@ start   : /* empty */
         | start EOL
         | start expr ';'
           {
-              driver.calc.expressions.push_back($2);
+              interface.calc.expressions.push_back($2);
           }
         | start expr EOL
           {
-              driver.calc.expressions.push_back($2);
+              interface.calc.expressions.push_back($2);
           }
         | start expr END
           {
-              driver.calc.expressions.push_back($2);
+              interface.calc.expressions.push_back($2);
           }
 ;
 %%
 
-void asd::Parser::error(const Parser::location_type& l, const std::string& m)
+void beadando::Parser::error(const Parser::location_type& l, const std::string& m)
 {
-    driver.error(l, m);
+    interface.error(l, m);
 }
